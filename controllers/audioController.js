@@ -3,35 +3,13 @@ import crypto from "crypto";
 import FormData from "form-data";
 import fs from "fs";
 import config from "../config/serverConfig.js";
-import { decryptFile, encryptFile } from "../services/cipher.services.js";
-import { pinFileBufferToIPFS, getFileFromIPFS } from "../services/pinata.services.js";
+import { decryptFile, encryptFile } from "../util/cipher.utils.js";
+import { pinFileBufferToIPFS, getFileFromIPFS } from "../util/pinata.utils.js";
+import { stream2buffer } from "../util/stream2buffer.utils.js";
 
 const password = config.encrption.password;
 const algorithm = config.encrption.algorithm;
 const key = crypto.scryptSync(password, "salt", 32);
-
-function stream2buffer(stream) {
-  const chunks = [];
-  const reader = stream.getReader();
-
-  function readStream() {
-    return reader.read().then(({ done, value }) => {
-      if (done) {
-        const totalLength = chunks.reduce(
-          (acc, chunk) => acc + chunk.length,
-          0
-        );
-        const buffer = Buffer.concat(chunks, totalLength);
-        return buffer;
-      }
-
-      chunks.push(value);
-      return readStream();
-    });
-  }
-
-  return readStream();
-}
 
 const getEmbeddings = async (fileBuffer, name) => {
   // make a post request with multipart file in form data to the api https://melomint.centralindia.cloudapp.azure.com/embeddings
