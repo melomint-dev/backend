@@ -1,45 +1,13 @@
-import axios from "axios";
 import crypto from "crypto";
-import FormData from "form-data";
 import fs from "fs";
 import config from "../config/serverConfig.js";
-import { decryptFile, encryptFile } from "../util/cipher.utils.js";
-import { pinFileBufferToIPFS, getFileFromIPFS } from "../util/pinata.utils.js";
-import { stream2buffer } from "../util/stream2buffer.utils.js";
-
+import { decryptFile, encryptFile } from "../utils/cipher.utils.js";
+import { pinFileBufferToIPFS, getFileFromIPFS } from "../utils/pinata.utils.js";
+import { stream2buffer } from "../utils/stream2buffer.utils.js";
+import { getEmbeddings } from "../services/songProcessing.services.js"
 const password = config.encrption.password;
 const algorithm = config.encrption.algorithm;
 const key = crypto.scryptSync(password, "salt", 32);
-
-const getEmbeddings = async (fileBuffer, name) => {
-  // make a post request with multipart file in form data to the api https://melomint.centralindia.cloudapp.azure.com/embeddings
-
-  const formData = new FormData();
-  console.log('filename: ', name+';type=audio/mpeg')
-  formData.append("file", fileBuffer, name);
-
-  try {
-    console.log("sending file to get embeddings");
-    const res = await axios.post(
-      "https://melomint.centralindia.cloudapp.azure.com/embeddings",
-      formData,
-      {
-        headers: {
-          ...formData.getHeaders(),
-          "Content-Type": "multipart/form-data;",
-          Accept: "application/json",
-        },
-      }
-    );
-
-    // console.log(res.data);
-    return res.data;
-
-  } catch (error) {
-    console.log(error);
-    return error;
-  }
-};
 
 export const uploadFile = async (req, res) => {
   try {
