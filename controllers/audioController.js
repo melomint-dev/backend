@@ -3,13 +3,12 @@ import fs from "fs";
 import axios from "axios";
 import FormData from "form-data";
 import { Readable } from "stream";
-import dotenv from "dotenv";
-dotenv.config();
+import config from "../config/serverConfig.js";
 
-const JWT = process.env.JWT;
+const JWT = config.pinata.jwt;
 
-const password = "password";
-const algorithm = "aes-256-ctr";
+const password = config.encrption.password;
+const algorithm = config.encrption.algorithm;
 const key = crypto.scryptSync(password, "salt", 32);
 
 const encryptFile = (fileBuffer) => {
@@ -90,7 +89,6 @@ const pinFileBufferToIPFS = async (fileBuffer, name) => {
     return error;
   }
 };
-//QmXkn9dqgFNSt5KvgEoZ3RwLGT5fWCGjYkBAPEwAmDBQX3
 
 const getEmbeddings = async (fileBuffer, name) => {
   // make a post request with multipart file in form data to the api https://melomint.centralindia.cloudapp.azure.com/embeddings
