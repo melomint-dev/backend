@@ -1,41 +1,15 @@
-import crypto from "crypto";
-import fs from "fs";
 import axios from "axios";
+import crypto from "crypto";
 import FormData from "form-data";
+import fs from "fs";
 import { Readable } from "stream";
 import config from "../config/serverConfig.js";
+import { decryptFile, encryptFile } from "../services/cipher.services.js";
 
 const JWT = config.pinata.jwt;
-
 const password = config.encrption.password;
 const algorithm = config.encrption.algorithm;
 const key = crypto.scryptSync(password, "salt", 32);
-
-const encryptFile = (fileBuffer) => {
-  const iv = crypto.randomBytes(16);
-  console.log(iv);
-  const cipher = crypto.createCipheriv(algorithm, key, iv);
-  const encryptedFileBuffer = Buffer.concat([
-    iv,
-    cipher.update(fileBuffer),
-    cipher.final(),
-  ]);
-  return encryptedFileBuffer;
-};
-
-const decryptFile = (fileBuffer) => {
-  // get iv from fileBuffer in buffer type
-  const iv = fileBuffer.slice(0, 16);
-  // get encrypted fileBuffer (without iv) in buffer type
-  fileBuffer = fileBuffer.slice(16);
-  console.log(iv);
-  const decipher = crypto.createDecipheriv(algorithm, key, iv);
-  const decryptedFileBuffer = Buffer.concat([
-    decipher.update(fileBuffer),
-    decipher.final(),
-  ]);
-  return decryptedFileBuffer;
-};
 
 function stream2buffer(stream) {
   const chunks = [];
@@ -123,7 +97,7 @@ const getEmbeddings = async (fileBuffer, name) => {
 export const uploadFile = async (req, res) => {
   try {
     //encrypt the file with the key and iv with the crypto library and save it in a new folder called encrypted with extension enc;
-    const encryptedFileBuffer = encryptFile(req.file.buffer);
+    const encryptedFileBuffer = encryptFile(req.file.buffer, algorithm, key);
     const encryptedFilePath = `encrypted/${req.file.originalname}.enc`;
     fs.writeFileSync(encryptedFilePath, encryptedFileBuffer);
 
@@ -172,7 +146,7 @@ export const getFile = async (req, res) => {
       fs.writeFileSync(encryptedFilePath, encryptedFileBuffer);
 
       // Decrypt the file and save it in a new folder called decrypted with extension mp3
-      const decryptedFileBuffer = decryptFile(encryptedFileBuffer);
+      const decryptedFileBuffer = decryptFile(encryptedFileBuffer, algorithm, key);
       fs.writeFileSync(decryptedFilePath, decryptedFileBuffer);
 
       console.log("file saved");
