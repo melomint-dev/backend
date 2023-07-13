@@ -1,0 +1,5 @@
+/node_modules
+/decrypted
+/encrypted
+.env
+/uploads
