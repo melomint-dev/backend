@@ -2,11 +2,10 @@ import axios from "axios";
 import crypto from "crypto";
 import FormData from "form-data";
 import fs from "fs";
-import { Readable } from "stream";
 import config from "../config/serverConfig.js";
 import { decryptFile, encryptFile } from "../services/cipher.services.js";
+import { pinFileBufferToIPFS, getFileFromIPFS } from "../services/pinata.services.js";
 
-const JWT = config.pinata.jwt;
 const password = config.encrption.password;
 const algorithm = config.encrption.algorithm;
 const key = crypto.scryptSync(password, "salt", 32);
@@ -33,36 +32,6 @@ function stream2buffer(stream) {
 
   return readStream();
 }
-
-const pinFileBufferToIPFS = async (fileBuffer, name) => {
-  const formData = new FormData();
-  const stream = Readable.from(fileBuffer);
-
-  formData.append("file", stream, {
-    filepath: name + ".enc",
-  });
-
-  try {
-    console.log("pinning file to ipfs");
-    const res = await axios.post(
-      "https://api.pinata.cloud/pinning/pinFileToIPFS",
-      formData,
-      {
-        maxBodyLength: "Infinity",
-        headers: {
-          "Content-Type": `multipart/form-data; boundary=${formData._boundary}`,
-          Authorization: JWT,
-        },
-      }
-    );
-
-    console.log(res.data);
-    return res.data.IpfsHash;
-  } catch (error) {
-    console.log(error);
-    return error;
-  }
-};
 
 const getEmbeddings = async (fileBuffer, name) => {
   // make a post request with multipart file in form data to the api https://melomint.centralindia.cloudapp.azure.com/embeddings
@@ -134,12 +103,10 @@ export const getFile = async (req, res) => {
       console.log("file not found");
 
       // Retrieve the encrypted file from IPFS
-      const pinataRes = await fetch(
-        `https://gateway.pinata.cloud/ipfs/${ipfsHash}`,
-        { method: "GET" }
-      );
-      //convert pinataRes.body ReadableStream to a buffer
-      const encryptedFileBuffer = await stream2buffer(pinataRes.body);
+      const pinataResBody = await getFileFromIPFS(ipfsHash);
+      
+      //convert pinataResBody ReadableStream to a buffer
+      const encryptedFileBuffer = await stream2buffer(pinataResBody);
 
       // save the encrypted file in a new folder called encrypted with extension enc
       const encryptedFilePath = `encrypted/${ipfsHash}.enc`;
