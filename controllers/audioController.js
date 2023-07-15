@@ -55,8 +55,8 @@ export const getFile = async (req, res) => {
       const encryptedFileBuffer = await stream2buffer(pinataResBody);
 
       // save the encrypted file in a new folder called encrypted with extension enc
-      const encryptedFilePath = `encrypted/${ipfsHash}.enc`;
-      fs.writeFileSync(encryptedFilePath, encryptedFileBuffer);
+      // const encryptedFilePath = `encrypted/${ipfsHash}.enc`;
+      // fs.writeFileSync(encryptedFilePath, encryptedFileBuffer);
 
       // Decrypt the file and save it in a new folder called decrypted with extension mp3
       const decryptedFileBuffer = decryptFile(encryptedFileBuffer, algorithm, key);
