@@ -13,8 +13,8 @@ export const uploadFile = async (req, res) => {
   try {
     //encrypt the file with the key and iv with the crypto library and save it in a new folder called encrypted with extension enc;
     const encryptedFileBuffer = encryptFile(req.file.buffer, algorithm, key);
-    const encryptedFilePath = `encrypted/${req.file.originalname}.enc`;
-    fs.writeFileSync(encryptedFilePath, encryptedFileBuffer);
+    // const encryptedFilePath = `encrypted/${req.file.originalname}.enc`;
+    // fs.writeFileSync(encryptedFilePath, encryptedFileBuffer);
 
     // pin the encrypted file to IPFS
     const IpfsHash = await pinFileBufferToIPFS(

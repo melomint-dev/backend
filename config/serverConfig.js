@@ -18,4 +18,8 @@ config.encrption = {
     algorithm: process.env.ENCRYPTION_ALGO,
 }
 
+config.redis = {
+    password: process.env.REDIS_PASSWORD
+}
+
 export default config;
