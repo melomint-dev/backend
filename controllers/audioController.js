@@ -4,33 +4,70 @@ import config from "../config/serverConfig.js";
 import { decryptFile, encryptFile } from "../utils/cipher.utils.js";
 import { pinFileBufferToIPFS, getFileFromIPFS } from "../utils/pinata.utils.js";
 import { stream2buffer } from "../utils/stream2buffer.utils.js";
-import { getEmbeddings } from "../services/songProcessing.services.js"
+import { getEmbeddings } from "../services/songProcessing.services.js";
+import { lowerMP3Quality } from "../utils/audioBufferEncoder.js";
 const password = config.encrption.password;
 const algorithm = config.encrption.algorithm;
 const key = crypto.scryptSync(password, "salt", 32);
 
 export const uploadFile = async (req, res) => {
   try {
-    //encrypt the file with the key and iv with the crypto library and save it in a new folder called encrypted with extension enc;
-    const encryptedFileBuffer = encryptFile(req.file.buffer, algorithm, key);
-    // const encryptedFilePath = `encrypted/${req.file.originalname}.enc`;
-    // fs.writeFileSync(encryptedFilePath, encryptedFileBuffer);
+    const audioFile = req.files.audio[0];
+    const imageFile = req.files.image[0];
 
-    // pin the encrypted file to IPFS
+    if (!req.files || !req.files.image || !req.files.audio) {
+      return res.status(400).json({ error: 'Both image and audio files are required' });
+    }else if(audioFile.mimetype !== "audio/mpeg"){
+      return res.status(401).json({ error: "File type not supported. please upload mp3 file" });
+    }else if(imageFile.mimetype !== "image/jpeg" && imageFile.mimetype !== "image/png"){
+      return res.status(402).json({ error: "File type not supported. please upload jpeg or png file" });
+    }
+
+    fs.writeFileSync(audioFile.originalname, audioFile.buffer);
+    const lowQualityBuffer = await lowerMP3Quality(audioFile.originalname);
+    const encryptedFileBufferLow = encryptFile(lowQualityBuffer, algorithm, key);
+    const encryptedFileBuffer = encryptFile(audioFile.buffer, algorithm, key);
+
+    const artistID = req.body.artistID || "0"; // remove this 0 after artistID is implemented in the frontend
+    console.log("artistID: ", artistID);
+
+    const coverImageHash = await pinFileBufferToIPFS(
+      imageFile.buffer,
+      imageFile.originalname
+    ); 
+    
     const IpfsHash = await pinFileBufferToIPFS(
       encryptedFileBuffer,
-      req.file.originalname
+      audioFile.originalname+ ".enc"
     );
+
+    let LowQualityIpfsHash;
+    await pinFileBufferToIPFS(
+      encryptedFileBufferLow,
+      "low "+audioFile.originalname+ ".enc"
+    ).then((res) => {
+      LowQualityIpfsHash = res
+      fs.unlinkSync(audioFile.originalname);
+    })
+
+    console.log("IpfsHash: ", IpfsHash);
+    console.log("LowQualityIpfsHash: ", LowQualityIpfsHash);
+    console.log("coverImageHash: ", coverImageHash);
 
     // get embeddings from the file
     const embeddings = await getEmbeddings(
-      req.file.buffer,
-      req.file.originalname
+      audioFile.buffer,
+      audioFile.originalname,
+      coverImageHash, 
+      IpfsHash, 
+      artistID
     );
 
-    res.status(200).json({ 
-      IpfsHash, 
-      embeddings 
+    res.status(200).json({
+      IpfsHash,
+      LowQualityIpfsHash,
+      embeddings,
+      coverImageHash
     });
 
   } catch (error) {
@@ -50,7 +87,7 @@ export const getFile = async (req, res) => {
 
       // Retrieve the encrypted file from IPFS
       const pinataResBody = await getFileFromIPFS(ipfsHash);
-      
+
       //convert pinataResBody ReadableStream to a buffer
       const encryptedFileBuffer = await stream2buffer(pinataResBody);
 
@@ -59,7 +96,11 @@ export const getFile = async (req, res) => {
       // fs.writeFileSync(encryptedFilePath, encryptedFileBuffer);
 
       // Decrypt the file and save it in a new folder called decrypted with extension mp3
-      const decryptedFileBuffer = decryptFile(encryptedFileBuffer, algorithm, key);
+      const decryptedFileBuffer = decryptFile(
+        encryptedFileBuffer,
+        algorithm,
+        key
+      );
       fs.writeFileSync(decryptedFilePath, decryptedFileBuffer);
 
       console.log("file saved");

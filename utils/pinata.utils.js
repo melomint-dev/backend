@@ -8,7 +8,7 @@ export const pinFileBufferToIPFS = async (fileBuffer, name) => {
     const stream = Readable.from(fileBuffer);
   
     formData.append("file", stream, {
-      filepath: name + ".enc",
+      filepath: name,
     });
   
     try {
@@ -26,7 +26,9 @@ export const pinFileBufferToIPFS = async (fileBuffer, name) => {
       );
   
       console.log(res.data);
-      return res.data.IpfsHash;
+      console.log(typeof res.data["IpfsHash"]);
+      console.log(res.data["IpfsHash"]);
+      return res.data["IpfsHash"];
     } catch (error) {
       console.log(error);
       return error;
