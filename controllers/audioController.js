@@ -115,7 +115,7 @@ export const getFile = async (req, res) => {
 
       console.log("file saved");
 
-      const maxFileCount = 6;
+      const { maxFileCount } = config.jugadFileCaching;
       deleteOldestFiles( maxFileCount );
     }
 

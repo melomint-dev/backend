@@ -26,4 +26,8 @@ config.admin = {
     AuthKey : "VERY-STRONG-HASH"
 }
 
+config.jugadFileCaching = {
+    maxFileCount: process.env.JUGAD_CACHE_FILE,
+}
+
 export default config;
