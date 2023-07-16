@@ -22,4 +22,8 @@ config.redis = {
     password: process.env.REDIS_PASSWORD
 }
 
+config.admin = {
+    AuthKey : "VERY-STRONG-HASH"
+}
+
 export default config;
