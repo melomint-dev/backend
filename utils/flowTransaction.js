@@ -3,7 +3,13 @@ import * as t from "@onflow/types";
 
 import { authorizationFunction } from "../utils/flowAuthorization.js";
 
-fcl.config().put("accessNode.api", "https://testnet.onflow.org");
+fcl.config({
+    "flow.network": "testnet",
+    "accessNode.api": "https://access-testnet.onflow.org",
+    "discovery.wallet": "https://fcl-discovery.onflow.org/testnet/authn",
+    "app.detail.title": "MeloMint",
+    "0xMeloMint": "0x62cfd688a83bc89c",
+  });
 
 export const sendTransaction = async (transaction) => {
   console.log("Sending Tx");
