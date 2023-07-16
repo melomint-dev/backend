@@ -1,25 +1,20 @@
 // utils/redis/cacheOperations.js
 import { redisClient } from "./redisConnection.js";
 
-const trackViewsKey = "track:views";
+const trackPlaysKey = "track:play";
 const trackPlayTimeKey = "track:playtime";
 
-export const incrementTrackViews = async (songId) => {
-  await redisClient.hIncrBy(trackViewsKey, songId, 1).then((replied) => {
-    console.log(`Views for track ${songId} incremented to ${replied}`); // development only
+export const incrementTrackPlays = async (songId) => {
+  await redisClient.hIncrBy(trackPlaysKey, songId, 1).then((replied) => {
+    console.log(`Plays for track ${songId} incremented to ${replied}`); // development only
   });
 };
 
-export const getAllTrackViews = async () => {
-  var trackViews = await redisClient.hGetAll(trackViewsKey);
-  // .then((trackViews) => {
-  //   trackViews = JSON.parse(JSON.stringify(trackViews));
-  //   console.log("Total views of all tracks are ", trackViews);
-  //   return trackViews;
-  // });
-  trackViews = JSON.parse(JSON.stringify(trackViews));
-  console.log("Total views of all tracks are ", trackViews);
-  return trackViews;
+export const getAllTrackPlays = async () => {
+  var trackPlays = await redisClient.hGetAll(trackPlaysKey);
+  trackPlays = JSON.parse(JSON.stringify(trackPlays));
+  console.log("Total plays of all tracks are ", trackPlays);
+  return trackPlays;
 };
 
 export const incrementTrackPlayTime = async (songId, playTimeInSeconds) => {
@@ -33,11 +28,6 @@ export const incrementTrackPlayTime = async (songId, playTimeInSeconds) => {
 
 export const getAllTrackPlayTimes = async () => {
   var trackPlayTime = await redisClient.hGetAll(trackPlayTimeKey);
-  // .then((trackPlayTime) => {
-  //   trackPlayTime = JSON.parse(JSON.stringify(trackPlayTime));
-  //   console.log("All tracks total play time: ", trackPlayTime);
-  //   return trackPlayTime;
-  // });
   trackPlayTime = JSON.parse(JSON.stringify(trackPlayTime));
   console.log("All tracks total play time: ", trackPlayTime);
   return trackPlayTime;

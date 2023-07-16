@@ -1,16 +1,17 @@
 import {
   clearRedisDatabase,
   getAllTrackPlayTimes,
-  getAllTrackViews,
+  getAllTrackPlays,
   incrementTrackPlayTime,
-  incrementTrackViews,
+  incrementTrackPlays,
 } from "../utils/redis/viewsOperations.js";
 
 export const ping = async (req, res) => {
   try {
     const { trackId } = req.body;
+    trackId.toString();
     console.log("ping", trackId); // development only
-    await incrementTrackPlayTime(trackId, 10).then((replied) => {
+    await incrementTrackPlayTime(trackId, 10).then(() => {
       res.status(200).json({ message: `Play time for track ${trackId}` });
     });
   } catch (error) {
@@ -22,8 +23,9 @@ export const ping = async (req, res) => {
 export const clickedTrack = async (req, res) => {
   try {
     const { trackId } = req.body;
-    await incrementTrackViews(trackId).then(() => {
-      res.status(200).json({ message: `Views for track ${trackId}` });
+    trackId.toString();
+    await incrementTrackPlays(trackId).then(() => {
+      res.status(200).json({ message: `Plays for track ${trackId}` });
     });
   } catch (error) {
     console.error(error);
@@ -31,19 +33,19 @@ export const clickedTrack = async (req, res) => {
   }
 };
 
-// a controller to update the views and play time of all tracks to flowchain
-export const updateViewsAndPlayTime = async (req, res) => {
+// a controller to update the Plays and play time of all tracks to flowchain
+export const updatePlaysAndPlayTime = async (req, res) => {
   try {
-    const allTrackViews = await getAllTrackViews();
+    const allTrackPlays = await getAllTrackPlays();
     const allTrackPlayTime = await getAllTrackPlayTimes();
     await clearRedisDatabase();
-    console.log("allTrackViews", allTrackViews); // development only
+    console.log("allTrackPlays", allTrackPlays); // development only
     console.log("allTrackPlayTime", allTrackPlayTime); // development only
 
-    // update the views and play time of all tracks to flowchain
+    // update the Plays and play time of all tracks to flowchain
 
     res.status(200).json({
-      message: "All track views and play time updated to flowchain",
+      message: "All track Plays and play time updated to flowchain",
       flowRes: '<flowchain response>',
     })
   } catch (error) {
