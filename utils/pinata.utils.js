@@ -24,10 +24,7 @@ export const pinFileBufferToIPFS = async (fileBuffer, name) => {
           },
         }
       );
-  
-      console.log(res.data);
-      console.log(typeof res.data["IpfsHash"]);
-      console.log(res.data["IpfsHash"]);
+
       return res.data["IpfsHash"];
     } catch (error) {
       console.log(error);
