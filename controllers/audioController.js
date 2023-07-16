@@ -134,3 +134,34 @@ export const getFile = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+export const imgToIPFS = async (req, res) => {
+  try {
+    const imageFile = req.files.image[0];
+
+    if (!req.files || !req.files.image) {
+      return res.status(400).json({ error: "Image file is required" });
+    } else if (
+      imageFile.mimetype !== "image/jpeg" &&
+      imageFile.mimetype !== "image/png"
+    ) {
+      return res
+        .status(402)
+        .json({
+          error: "File type not supported. please upload jpeg or png file",
+        });
+    }
+
+    const imageHash = await pinFileBufferToIPFS(
+      imageFile.buffer,
+      imageFile.originalname
+    );
+
+    res.status(200).json({
+      imageHash
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
