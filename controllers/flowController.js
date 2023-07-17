@@ -42,10 +42,10 @@ export const transactions = {
     import MeloMint from 0xMeloMint
 
     transaction(userId: Address, artistId: Address) {
-        prepare(signer: AuthAccount) {
-            MeloMint.personAddSubscribedTo(person: signer, artistId: artistId)
-            MeloMint.personAddSubscriber(person: signer, userId: userId)
-        }
+      prepare(signer: AuthAccount) {
+          MeloMint.personAddSubscribedTo(person: signer, artistId: artistId, userId: userId)
+          MeloMint.personAddSubscriber(person: signer, userId: userId, artistId: artistId)
+      }
     }
     `;
     let response = await sendTransaction({
