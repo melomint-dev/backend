@@ -8,6 +8,8 @@ import { getEmbeddings } from "../services/songProcessing.services.js";
 import { lowerMP3Quality } from "../utils/audioBufferEncoder.js";
 import { deleteOldestFiles } from "../utils/jugadFileCaching.js";
 import { type } from "os";
+import { createSongHashTransaction } from "../cadence/transactions/createSongHash.js";
+import * as fcl from "@onflow/fcl";
 const password = config.encrption.password;
 const algorithm = config.encrption.algorithm;
 const key = crypto.scryptSync(password, "salt", 32);
@@ -29,11 +31,9 @@ export const uploadFile = async (req, res) => {
       imageFile.mimetype !== "image/jpeg" &&
       imageFile.mimetype !== "image/png"
     ) {
-      return res
-        .status(402)
-        .json({
-          error: "File type not supported. please upload jpeg or png file",
-        });
+      return res.status(402).json({
+        error: "File type not supported. please upload jpeg or png file",
+      });
     }
 
     fs.writeFileSync(audioFile.originalname, audioFile.buffer);
@@ -80,12 +80,25 @@ export const uploadFile = async (req, res) => {
       artistID
     );
 
-    res.status(200).json({
-      IpfsHash,
-      LowQualityIpfsHash,
-      embeddings,
-      coverImageHash,
+    let code = createSongHashTransaction;
+    let response = await sendTransaction({
+      code: code,
+      args: [
+        fcl.arg(req.body.songId, fcl.t.String),
+        fcl.arg(IpfsHash, fcl.t.String),
+        fcl.arg("null", fcl.t.String),
+      ],
     });
+    log(response);
+
+    if (response == false) {
+      res.status(400).json({ message: "Error" });
+    } else {
+      res.status(200).json({
+        LowQualityIpfsHash,
+        coverImageHash,
+      });
+    }
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal server error" });
@@ -95,9 +108,9 @@ export const uploadFile = async (req, res) => {
 export const getFile = async (req, res) => {
   try {
     const { ipfsHash } = req.params;
-    if(!ipfsHash) {
+    if (!ipfsHash) {
       return res.status(400).json({ error: "ipfsHash is required" });
-    }else if(ipfsHash.length !== 46 && typeof ipfsHash !== "string") {
+    } else if (ipfsHash.length !== 46 && typeof ipfsHash !== "string") {
       return res.status(400).json({ error: "ipfsHash is invalid" });
     }
     const decryptedFilePath = `decrypted/${ipfsHash}.mp3`;
@@ -122,7 +135,7 @@ export const getFile = async (req, res) => {
       console.log("file saved");
 
       const { maxFileCount } = config.jugadFileCaching;
-      deleteOldestFiles( maxFileCount );
+      deleteOldestFiles(maxFileCount);
     }
 
     // Set the appropriate headers for audio streaming
@@ -151,11 +164,9 @@ export const imgToIPFS = async (req, res) => {
       imageFile.mimetype !== "image/jpeg" &&
       imageFile.mimetype !== "image/png"
     ) {
-      return res
-        .status(402)
-        .json({
-          error: "File type not supported. please upload jpeg or png file",
-        });
+      return res.status(402).json({
+        error: "File type not supported. please upload jpeg or png file",
+      });
     }
 
     const imageHash = await pinFileBufferToIPFS(
@@ -164,10 +175,10 @@ export const imgToIPFS = async (req, res) => {
     );
 
     res.status(200).json({
-      imageHash
+      imageHash,
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal server error" });
   }
-}
+};

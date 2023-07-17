@@ -16,7 +16,6 @@ router
   .get("/sampleTx", transactions.sampleTransaction)
   .post("/createSongHash", transactions.createSongHash)
   .post("/addSubscribers", transactions.addSubscribers)
-  .post("/addSubscribers", transactions.addSubscribers)
   .get("/getGoldSongAsset", scripts.getGoldSongAsset)
   .get("/getNFTSongAsset", scripts.getNFTSongAsset);
 
