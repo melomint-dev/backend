@@ -3,6 +3,7 @@ import * as fcl from "@onflow/fcl";
 import { executeScript, sendTransaction } from "../utils/flowTransaction.js";
 import { authorizationFunction } from "../utils/flowAuthorization.js";
 import flowService from "../services/flow.service.js";
+import { createSongHashTransaction } from "../cadence/transactions/transaction.js";
 
 export const transactions = {
   sampleTransaction: async (req, res) => {
@@ -22,22 +23,7 @@ export const transactions = {
 
   createSongHash: async (req, res) => {
     log(req.body);
-    let code = `
-    import MeloMint from 0xMeloMint
-
-    transaction(songId: String, goldSong: String, NFTSong: String) {
-      prepare(signer: AuthAccount) {
-        let res <- signer.load<@MeloMint.SongCollection>(from: MeloMint.SongCollectionStoragePath)!
-        if goldSong != "null" {
-          res.addGoldSong(songId: songId, songHash: goldSong)
-        }
-        if NFTSong != "null" {
-          res.addNFTSong(songId: songId, songHash: NFTSong)
-        }
-        signer.save(<-res, to: MeloMint.SongCollectionStoragePath)
-      }
-    }
-    `;
+    let code = createSongHashTransaction;
     let response = await sendTransaction({
       code: code,
       args: [
