@@ -7,6 +7,7 @@ import { stream2buffer } from "../utils/stream2buffer.utils.js";
 import { getEmbeddings } from "../services/songProcessing.services.js";
 import { lowerMP3Quality } from "../utils/audioBufferEncoder.js";
 import { deleteOldestFiles } from "../utils/jugadFileCaching.js";
+import { type } from "os";
 const password = config.encrption.password;
 const algorithm = config.encrption.algorithm;
 const key = crypto.scryptSync(password, "salt", 32);
@@ -91,9 +92,16 @@ export const uploadFile = async (req, res) => {
   }
 };
 
+QmdztfvDRgVaUUs5SoHM4HNnsy8t9A1xmtN1k8Ky9XYC8r
+
 export const getFile = async (req, res) => {
   try {
     const { ipfsHash } = req.params;
+    if(!ipfsHash) {
+      return res.status(400).json({ error: "ipfsHash is required" });
+    }else if(ipfsHash.length !== 46 && typeof ipfsHash !== "string") {
+      return res.status(400).json({ error: "ipfsHash is invalid" });
+    }
     const decryptedFilePath = `decrypted/${ipfsHash}.mp3`;
 
     // stream the decrypted file to the client
