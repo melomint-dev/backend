@@ -4,6 +4,7 @@ import * as t from "@onflow/types";
 import { useScript } from "../cadence/helpers/script.js";
 import { getAllSongScript } from "../cadence/scripts/getAllSongs.js";
 import { getPersonByAddressScript } from "../cadence/scripts/getPersonByAddress.js";
+import { getPeopleScript } from "../cadence/scripts/getAllPeople.js";
 
 class FlowService {
   /**
@@ -34,6 +35,19 @@ class FlowService {
       return Object.values(data);
     } catch (error) {
       console.log("ERROR IN GET ALL SONGS SERVICE", error);
+      throw error;
+    }
+  }
+
+  async getAllPeople() {
+    try {
+      const data = await useScript({
+        code: getPeopleScript,
+        args: [],
+      });
+      return Object.values(data);
+    } catch (error) {
+      console.log("ERROR IN GET ALL PEOPLE SERVICE", error);
       throw error;
     }
   }
@@ -137,6 +151,45 @@ class FlowService {
       );
     } catch (error) {
       console.log("ERROR IN GET TRENDING SONGS SERVICE", error);
+      throw error;
+    }
+  }
+
+  /**
+   *
+   * @param {string} query
+   * @returns
+   */
+  async search(query) {
+    try {
+      const allSongs = await this.getAllSongs();
+      const allArtists = await this.getAllPeople();
+
+      if (!query) return { songs: [], artists: [] };
+
+      const fileteredSongs = allSongs
+        .filter((song) => song.name.toLowerCase().includes(query.toLowerCase()))
+        .map((song) => {
+          return {
+            ...song,
+            artist: allArtists.find((artist) => artist.id === song.artist),
+          };
+        });
+
+      const fileteredArtists = allArtists
+        .filter((artist) => artist.type == "1")
+        .filter(
+          (artist) =>
+            artist.firstName.toLowerCase().includes(query.toLowerCase()) ||
+            artist.lastName.toLowerCase().includes(query.toLowerCase())
+        );
+
+      return {
+        songs: fileteredSongs,
+        artists: fileteredArtists,
+      };
+    } catch (error) {
+      console.log("ERROR IN SEARCH SERVICE", error);
       throw error;
     }
   }
