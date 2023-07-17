@@ -2,7 +2,7 @@ import { sansPrefix, withPrefix } from "@onflow/fcl";
 import { SHA3 } from "sha3";
 import pkg from "elliptic";
 const { ec: EC } = pkg;
-// const ec = new EC("secp256k1");
+const ec = new EC("p256")
 import flowCredentials from "../flow.json" assert { type: "json" };
 
 const ADDRESS = flowCredentials.accounts["deploy"].address;
@@ -10,8 +10,8 @@ const PRIVATE_KEY = flowCredentials.accounts["deploy"].key.privateKey;
 const KEY_ID = flowCredentials.accounts["deploy"].key.index;
 
 const sign = (message) => {
-  // const key = ec.keyFromPrivate(Buffer.from(PRIVATE_KEY, "hex"));
-  const key = PRIVATE_KEY;
+  const key = ec.keyFromPrivate(Buffer.from(PRIVATE_KEY, "hex"));
+  // const key = PRIVATE_KEY
   const sig = key.sign(hash(message)); // hashMsgHex -> hash
   const n = 32;
   const r = sig.r.toArrayLike(Buffer, "be", n);
