@@ -2,8 +2,7 @@ import * as fcl from "@onflow/fcl";
 import * as t from "@onflow/types";
 
 import { authorizationFunction } from "../utils/flowAuthorization.js";
-import { useScript } from "../cadence/helpers/script.js";
-import { getAllSongScript } from "../cadence/scripts/getAllSongs.js";
+import flowService from "../services/flow.service.js";
 
 fcl.config().put("accessNode.api", "https://testnet.onflow.org");
 
@@ -33,14 +32,11 @@ export const sendTx = async () => {
 class AbstractionsController {
   async getAllSongs(req, res) {
     try {
-      const data = await useScript({
-        code: getAllSongScript,
-        args: [],
-      });
+      const data = await flowService.getAllSongs();
       res.status(200).json(data);
     } catch (error) {
-      console.log(error);
-      throw error;
+      console.log("ERROR IN GET ALL SONGS", error);
+      res.status(500).json({ error: error.message });
     }
   }
 }
