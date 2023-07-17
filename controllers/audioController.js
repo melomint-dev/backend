@@ -85,7 +85,7 @@ export const uploadFile = async (req, res) => {
     let response = await sendTransaction({
       code: code,
       args: [
-        fcl.arg(req.body.songId, fcl.t.String),
+        fcl.arg(coverImageHash, fcl.t.String),
         fcl.arg(IpfsHash, fcl.t.String),
         fcl.arg("null", fcl.t.String),
       ],
