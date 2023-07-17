@@ -1,8 +1,11 @@
 import { Router } from "express";
-import { sendTx } from "../controllers/flowController.js";
+import {
+  abstractionsController,
+  sendTx,
+} from "../controllers/flowController.js";
 
 const router = Router();
 
-router.get("/sendTx", sendTx);
+router.get("/sendTx", sendTx).get("/songs", abstractionsController.getAllSongs);
 
 export default router;
