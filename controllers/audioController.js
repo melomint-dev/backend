@@ -90,7 +90,7 @@ export const uploadFile = async (req, res) => {
         fcl.arg("null", fcl.t.String),
       ],
     });
-    log(response);
+    console.log(response);
 
     if (response == false) {
       res.status(400).json({ message: "Error" });
