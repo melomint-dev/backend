@@ -115,16 +115,19 @@ class FlowService {
     try {
       const trendingSongs = await this.getTrendingSongs(noOfArtists * 2);
 
-      const trendingSongArtistAddresses = trendingSongs.map(
-        (song) => song.artist
-      );
+      const artistDatabyId = {};
+      const trendingSongArtists = trendingSongs.map((song) => {
+        artistDatabyId[song.artist.id] = song.artist;
+        return song.artist;
+      });
 
-      const uniqueAddresses = [...new Set(trendingSongArtistAddresses)].slice(
-        0,
-        noOfArtists
-      );
+      const uniqueAddresses = [
+        ...new Set(trendingSongArtists.map((artist) => artist.id)),
+      ].slice(0, noOfArtists);
 
-      return uniqueAddresses;
+      return uniqueAddresses.map((address) => {
+        return artistDatabyId[address];
+      });
     } catch (error) {
       console.log("ERROR IN GET TRENDING SONGS SERVICE", error);
       throw error;
