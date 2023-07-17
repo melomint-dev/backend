@@ -10,6 +10,7 @@ import { deleteOldestFiles } from "../utils/jugadFileCaching.js";
 import { type } from "os";
 import { createSongHashTransaction } from "../cadence/transactions/createSongHash.js";
 import * as fcl from "@onflow/fcl";
+import { sendTransaction } from "../utils/flowTransaction.js";
 const password = config.encrption.password;
 const algorithm = config.encrption.algorithm;
 const key = crypto.scryptSync(password, "salt", 32);
@@ -89,7 +90,7 @@ export const uploadFile = async (req, res) => {
         fcl.arg("null", fcl.t.String),
       ],
     });
-    log(response);
+    console.log(response);
 
     if (response == false) {
       res.status(400).json({ message: "Error" });
