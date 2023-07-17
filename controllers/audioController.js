@@ -92,8 +92,6 @@ export const uploadFile = async (req, res) => {
   }
 };
 
-QmdztfvDRgVaUUs5SoHM4HNnsy8t9A1xmtN1k8Ky9XYC8r
-
 export const getFile = async (req, res) => {
   try {
     const { ipfsHash } = req.params;
