@@ -4,6 +4,8 @@ import { executeScript, sendTransaction } from "../utils/flowTransaction.js";
 import { authorizationFunction } from "../utils/flowAuthorization.js";
 import flowService from "../services/flow.service.js";
 import { createSongHashTransaction } from "../cadence/transactions/transaction.js";
+import { getPremiumSongHashScript } from "../cadence/scripts/getPremiumSongHash.js";
+import { useScript } from "../cadence/helpers/script.js";
 
 export const transactions = {
   sampleTransaction: async (req, res) => {
@@ -64,6 +66,18 @@ export const transactions = {
 };
 
 export const scripts = {
+  getPremiumSongHash: async (req, res) => {
+    console.log(req.body);
+    let response = await useScript({
+      code: getPremiumSongHashScript,
+      args: [
+        fcl.arg(req.body.songId, fcl.t.String),
+        fcl.arg(req.body.userId, fcl.t.Address),
+      ],
+    });
+    res.send(response);
+  },
+
   getGoldSongAsset: async (req, res) => {
     let code = `
     import MeloMint from 0xMeloMint

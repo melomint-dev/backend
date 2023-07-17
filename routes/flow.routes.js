@@ -17,6 +17,7 @@ router
   .post("/createSongHash", transactions.createSongHash)
   .post("/addSubscribers", transactions.addSubscribers)
   .get("/getGoldSongAsset", scripts.getGoldSongAsset)
-  .get("/getNFTSongAsset", scripts.getNFTSongAsset);
+  .get("/getNFTSongAsset", scripts.getNFTSongAsset)
+  .get("/getGoldSongHash", scripts.getPremiumSongHash);
 
 export default router;
