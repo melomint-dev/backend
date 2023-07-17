@@ -38,6 +38,32 @@ class FlowService {
     }
   }
 
+  async populateArtistData(song) {
+    try {
+      const artist = await this.getPersonByAddress(song.artist);
+      return {
+        ...song,
+        artist,
+      };
+    } catch (error) {
+      console.log("ERROR IN POPULATE ARTIST DATA SERVICE", error);
+      throw error;
+    }
+  }
+
+  async populateArtistDataForSongs(songs) {
+    try {
+      return await Promise.all(
+        songs.map(async (song) => {
+          return await this.populateArtistData(song);
+        })
+      );
+    } catch (error) {
+      console.log("ERROR IN POPULATE ARTIST DATA FOR SONGS SERVICE", error);
+      throw error;
+    }
+  }
+
   async getTrendingSongs(noOfSongs) {
     try {
       const songsList = await this.getAllSongs();
@@ -62,7 +88,9 @@ class FlowService {
       });
 
       // return top {{noOfSongs}} songs
-      return trendingSongs.slice(0, noOfSongs);
+      return await this.populateArtistDataForSongs(
+        trendingSongs.slice(0, noOfSongs)
+      );
     } catch (error) {
       console.log("ERROR IN GET TRENDING SONGS SERVICE", error);
       throw error;
@@ -82,9 +110,7 @@ class FlowService {
         noOfArtists
       );
 
-      return await Promise.all(
-        uniqueAddresses.map(async (address) => this.getPersonByAddress(address))
-      );
+      return uniqueAddresses;
     } catch (error) {
       console.log("ERROR IN GET TRENDING SONGS SERVICE", error);
       throw error;
@@ -106,7 +132,9 @@ class FlowService {
       });
 
       // return top {{noOfSongs}} songs
-      return latestSongs.slice(0, noOfSongs);
+      return await this.populateArtistDataForSongs(
+        latestSongs.slice(0, noOfSongs)
+      );
     } catch (error) {
       console.log("ERROR IN GET TRENDING SONGS SERVICE", error);
       throw error;
