@@ -139,7 +139,7 @@ export const imgToIPFS = async (req, res) => {
   try {
     const imageFile = req.files.image[0];
 
-    if (!req.files || !req.files.image) {
+    if (!req.files || !imageFile) {
       return res.status(400).json({ error: "Image file is required" });
     } else if (
       imageFile.mimetype !== "image/jpeg" &&
