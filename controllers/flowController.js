@@ -159,6 +159,16 @@ class AbstractionsController {
       res.status(500).json({ error: error.message });
     }
   }
+
+  async search(req, res) {
+    try {
+      const data = await flowService.search(req.query.q);
+      res.status(200).json(data);
+    } catch (error) {
+      console.log("ERROR IN SEARCH", error);
+      res.status(500).json({ error: error.message });
+    }
+  }
 }
 
 export const abstractionsController = new AbstractionsController();

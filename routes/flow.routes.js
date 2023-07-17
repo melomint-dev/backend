@@ -12,6 +12,7 @@ router
   .get("/abstractions/songs/trending", abstractionsController.getTrendingSongs)
   .get("/abstractions/songs/latest", abstractionsController.getLatestSongs)
   .get("/abstractions/artists/rising", abstractionsController.getArtistsOnRise)
+  .get("/abstractions/search", abstractionsController.search)
   .get("/sampleTx", transactions.sampleTransaction)
   .post("/createSongHash", transactions.createSongHash)
   .post("/addSubscribers", transactions.addSubscribers)
