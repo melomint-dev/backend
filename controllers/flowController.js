@@ -37,7 +37,7 @@ export const transactions = {
 
   addSubscribers: async (req, res) => {
     console.log("Add Subscribers");
-    log(req.body);
+    console.log(req.body);
     let code = `
     import MeloMint from 0xMeloMint
 
