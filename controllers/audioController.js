@@ -108,7 +108,7 @@ export const uploadFile = async (req, res) => {
 export const getFile = async (req, res) => {
   try {
     const { ipfsHash } = req.params;
-    if (!ipfsHash) {
+    if (!ipfsHash || ipfsHash === undefined) {
       return res.status(400).json({ error: "ipfsHash is required" });
     } else if (ipfsHash.length !== 46 && typeof ipfsHash !== "string") {
       return res.status(400).json({ error: "ipfsHash is invalid" });
