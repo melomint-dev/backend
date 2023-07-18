@@ -3,7 +3,13 @@ import * as fcl from "@onflow/fcl";
 import { executeScript, sendTransaction } from "../utils/flowTransaction.js";
 import { authorizationFunction } from "../utils/flowAuthorization.js";
 import flowService from "../services/flow.service.js";
-import { createSongHashTransaction } from "../cadence/transactions/transaction.js";
+import {
+  addSongLikesTransaction,
+  createSongHashTransaction,
+  updateSubscriptionTimeTransaction,
+} from "../cadence/transactions/transaction.js";
+import { getPremiumSongHashScript } from "../cadence/scripts/getPremiumSongHash.js";
+import { useScript } from "../cadence/helpers/script.js";
 
 export const transactions = {
   sampleTransaction: async (req, res) => {
@@ -22,7 +28,7 @@ export const transactions = {
   },
 
   createSongHash: async (req, res) => {
-    log(req.body);
+    console.log(req.body);
     let code = createSongHashTransaction;
     let response = await sendTransaction({
       code: code,
@@ -33,6 +39,24 @@ export const transactions = {
       ],
     });
     res.send(response);
+  },
+
+  addSongLikes: async (req, res) => {
+    console.log("Adding likes to Song");
+    console.log(req.body);
+
+    let response = await sendTransaction({
+      code: addSongLikesTransaction,
+      args: [
+        fcl.arg(req.body.songId, fcl.t.String),
+        fcl.arg(req.body.like, fcl.t.Int),
+      ],
+    });
+    if (response == false) {
+      res.status(400).json({ message: "Error Occured" });
+    } else {
+      res.status(200).json({ message: response });
+    }
   },
 
   addSubscribers: async (req, res) => {
@@ -61,59 +85,35 @@ export const transactions = {
       res.status(200).json({ message: response });
     }
   },
+
+  updateSubscriptionTime: async (req, res) => {
+    console.log("Update Subscription Time");
+    console.log(req.body);
+
+    let response = await sendTransaction({
+      code: updateSubscriptionTimeTransaction,
+      args: [
+        fcl.arg(req.body.userId, fcl.t.Address),
+        fcl.arg(req.body.additionalTime, fcl.t.UFix64),
+      ],
+    });
+    if (response == false) {
+      res.status(400).json({ message: "Error" });
+    } else {
+      res.status(200).json({ message: response });
+    }
+  },
 };
 
 export const scripts = {
-  getGoldSongAsset: async (req, res) => {
-    let code = `
-    import MeloMint from 0xMeloMint
-
-    pub fun main(songId: String, userId: Address): String {
-      if MeloMint.getPersonByAddress(id: userId).subscriptionTill >= getCurrentBlock().timestamp {
-        let signer = getAuthAccount(0xMeloMint)
-        var songAsset: String = ""
-        let res <- signer.load<@MeloMint.SongCollection>(from: MeloMint.SongCollectionStoragePath)!
-  
-        if res.isGoldSongExists(songId: songId) {
-          songAsset = res.getGoldSong(songId: songId)
-        }
-        
-        signer.save(<- res, to: MeloMint.SongCollectionStoragePath)
-        return songAsset
-      }
-      return ""
-    }
-    `;
-    let response = await executeScript({
-      code: code,
-      args: [fcl.arg(req.body.songId, fcl.t.String)],
-    });
-    res.send(response);
-  },
-
-  getNFTSongAsset: async (req, res) => {
-    let code = `
-    import MeloMint from 0xMeloMint
-
-    pub fun main(songId: String, userId: Address, artistId: Address): String {
-      if MeloMint.getPersonByAddress(id: userId).subscribedTo.containsKey(artistId) && MeloMint.getPersonByAddress(id: artistId).subscribers.containsKey(userId) {
-        let signer = getAuthAccount(0xMeloMint)
-        var songAsset: String = ""
-        let res <- signer.load<@MeloMint.SongCollection>(from: MeloMint.SongCollectionStoragePath)!
-    
-        if res.isNFTSongExists(songId: songId) {
-          songAsset = res.getGoldSong(songId: songId)
-        }
-        
-        signer.save(<- res, to: MeloMint.SongCollectionStoragePath)
-        return songAsset
-      }
-      return ""
-    }
-    `;
-    let response = await executeScript({
-      code: code,
-      args: [fcl.arg(req.body.songId, fcl.t.String)],
+  getPremiumSongHash: async (req, res) => {
+    console.log(req.body);
+    let response = await useScript({
+      code: getPremiumSongHashScript,
+      args: [
+        fcl.arg(req.body.songId, fcl.t.String),
+        fcl.arg(req.body.userId, fcl.t.Address),
+      ],
     });
     res.send(response);
   },

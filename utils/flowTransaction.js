@@ -1,8 +1,7 @@
 import * as fcl from "@onflow/fcl";
-import * as t from "@onflow/types";
 
 import { authorizationFunction } from "../utils/flowAuthorization.js";
-import flowCredentials from "../flow.json" assert{ type: "json" };
+import flowCredentials from "../flow.json" assert { type: "json" };
 
 fcl.config({
   "flow.network": "testnet",
@@ -39,11 +38,14 @@ export const sendTransaction = async (transaction) => {
 
 export const executeScript = async (script) => {
   console.log("Executing Script");
-  console.log(script);
+  console.log(script.args);
 
   try {
     const response = await fcl
-      .query([fcl.script(script.code), fcl.args(script.args)])
+      .send({
+        cadence: script.code,
+        args: script.args,
+      })
       .then(fcl.decode);
     console.log(response);
     return response;
