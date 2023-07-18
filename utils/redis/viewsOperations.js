@@ -41,3 +41,25 @@ export const clearRedisDatabase = async () => {
     console.log(replies);
   });
 };
+
+
+// get an array of n tracks with highest plays
+const getTopNTracks = async (n) => {
+  const trackPlays = await getAllTrackPlays();
+  const topNTracks = Object.keys(trackPlays).sort((a, b) => trackPlays[b] - trackPlays[a]).slice(0, n);
+  return topNTracks;
+}
+
+// set and get the top n tracks from redis
+export const setTopNTracks = async (n) => {
+  const topNTracks = await getTopNTracks(n);
+  await redisClient.set("topNTracks", JSON.stringify(topNTracks));
+  console.log("Top n tracks set in redis", topNTracks);
+  return topNTracks;
+}
+
+export const getTopNTracksFromRedis = async () => {
+  const topNTracks = await redisClient.get("topNTracks");
+  console.log("Top n tracks from redis", topNTracks);
+  return JSON.parse(topNTracks);
+}
