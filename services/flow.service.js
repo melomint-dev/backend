@@ -32,7 +32,10 @@ class FlowService {
         args: [],
       });
 
-      return Object.values(data);
+      // Remove Blacklisted IDS
+      return Object.values(data).filter(
+        (item) => item.id != "QmfGECMJmHmFw9oLkpy8uir4sRR1kkZ73Y1wYaibB4Yf3a"
+      );
     } catch (error) {
       console.log("ERROR IN GET ALL SONGS SERVICE", error);
       throw error;
