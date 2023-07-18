@@ -7,7 +7,7 @@ pub fun main(songId: String, userId: Address, artistId: Address): String {
     let havePlatformSubscription: Bool = MeloMint.getPersonByAddress(id: userId).subscriptionTill >= getCurrentBlock().timestamp
 
     var songAsset: String = ""
-    let signer = getAuthAccount(0x01)
+    let signer = getAuthAccount(0xMeloMint)
     let res <- signer.load<@MeloMint.SongCollection>(from: MeloMint.SongCollectionStoragePath)!
 
     if isPreReleaseExpired {
