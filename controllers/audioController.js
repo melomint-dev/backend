@@ -128,6 +128,7 @@ export const getFile = async (req, res) => {
     let ipfsHash;
 
     const { songId, artistId, userId } = req.body;
+    console.log(req.body);
 
     let response = await useScript({
       code: loadSongForUser,
