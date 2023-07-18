@@ -4,6 +4,7 @@ import {
   getAllTrackPlays,
   incrementTrackPlayTime,
   incrementTrackPlays,
+  setTopNTracks,
 } from "../utils/redis/viewsOperations.js";
 
 export const ping = async (req, res) => {
@@ -38,6 +39,7 @@ export const updatePlaysAndPlayTime = async (req, res) => {
   try {
     const allTrackPlays = await getAllTrackPlays();
     const allTrackPlayTime = await getAllTrackPlayTimes();
+    await setTopNTracks(10);
     await clearRedisDatabase();
     console.log("allTrackPlays", allTrackPlays); // development only
     console.log("allTrackPlayTime", allTrackPlayTime); // development only
