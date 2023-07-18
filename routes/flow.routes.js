@@ -16,7 +16,8 @@ router
   .get("/sampleTx", transactions.sampleTransaction)
   .post("/createSongHash", transactions.createSongHash)
   .post("/addSubscribers", transactions.addSubscribers)
-  .get("/getGoldSongHash", scripts.getPremiumSongHash)
-  .get("/")
+  // .get("/getGoldSongHash", scripts.getPremiumSongHash)
+  .post("/updateSubscriptionTime", transactions.updateSubscriptionTime)
+  .post("/addSongLikes", transactions.addSongLikes);
 
 export default router;

@@ -11,6 +11,8 @@ import { type } from "os";
 import { createSongHashTransaction } from "../cadence/transactions/createSongHash.js";
 import * as fcl from "@onflow/fcl";
 import { sendTransaction } from "../utils/flowTransaction.js";
+import { useScript } from "../cadence/helpers/script.js";
+import { loadSongForUser } from "../cadence/scripts/loadSongAccordingToUser.js";
 const password = config.encrption.password;
 const algorithm = config.encrption.algorithm;
 const key = crypto.scryptSync(password, "salt", 32);
@@ -46,7 +48,8 @@ export const uploadFile = async (req, res) => {
     );
     const encryptedFileBuffer = encryptFile(audioFile.buffer, algorithm, key);
 
-    const artistID = req.body.artistID || "0"; // remove this 0 after artistID is implemented in the frontend
+    const artistID = req.body.artistID; // implemented
+    // const preRelease = req.body.preRelease;
     console.log("artistID: ", artistID);
 
     const coverImageHash = await pinFileBufferToIPFS(
@@ -87,7 +90,7 @@ export const uploadFile = async (req, res) => {
       args: [
         fcl.arg(coverImageHash, fcl.t.String),
         fcl.arg(IpfsHash, fcl.t.String),
-        fcl.arg("null", fcl.t.String),
+        fcl.arg(LowQualityIpfsHash, fcl.t.String),
       ],
     });
     console.log(response);
@@ -96,7 +99,7 @@ export const uploadFile = async (req, res) => {
       res.status(400).json({ message: "Error" });
     } else {
       res.status(200).json({
-        LowQualityIpfsHash,
+        LowQualityIpfsHash: "null",
         coverImageHash,
       });
     }
@@ -108,7 +111,22 @@ export const uploadFile = async (req, res) => {
 
 export const getFile = async (req, res) => {
   try {
-    const { ipfsHash } = req.params;
+    let ipfsHash;
+
+    const { songId, artistId, userId } = req.body;
+
+    let response = await useScript({
+      code: loadSongForUser,
+      args: [
+        fcl.arg(songId, fcl.t.String),
+        fcl.arg(userId, fcl.t.Address),
+        fcl.arg(artistId, fcl.t.Address),
+      ],
+    });
+    console.log(response);
+
+    ipfsHash = response;
+
     if (!ipfsHash || ipfsHash === undefined) {
       return res.status(400).json({ error: "ipfsHash is required" });
     } else if (ipfsHash.length !== 46 && typeof ipfsHash !== "string") {

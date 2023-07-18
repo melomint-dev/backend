@@ -16,7 +16,7 @@ const upload = multer({ storage: storage }).fields([
 const ImgUpload = multer({ storage: storage }).single("image");
 
 router.post("/upload", upload, uploadFile);
-router.get("/get-file/:ipfsHash", getFile);
+router.get("/get-file", getFile);
 router.post("/uploadImage", ImgUpload, imgToIPFS);
 
 export default router;
