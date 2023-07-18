@@ -12,7 +12,7 @@ const port = config.server.port;
 
 fcl.config({
   "app.detail.title": "MeloMint",
-  "0xMeloMint": "0x636351c10618dd9a",
+  "0xMeloMint": "0x7d5835e221b85422",
 });
 
 app.use(cors());
