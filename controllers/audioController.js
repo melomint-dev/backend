@@ -80,12 +80,26 @@ export const uploadFile = async (req, res) => {
       IpfsHash,
       artistID
     );
+    
+    // cleaning the embeddings object
+    var result = {};
+
+    Object.values(embeddings.similarity_scores).forEach((val, index, arr) => {
+      if (val > 0.8) {
+        let key = embeddings.similarity_scores_song_ids[index];
+        if (result[key] === undefined) {
+          result[key] = [];
+        }
+        result[key].push(index);
+        result[key].push(embeddings.similarity_scores_song_embedding_keys[index]);
+      }
+    });
 
     let code = createSongHashTransaction;
     let response = await sendTransaction({
       code: code,
       args: [
-        fcl.arg(req.body.songId, fcl.t.String),
+        fcl.arg(coverImageHash, fcl.t.String),
         fcl.arg(IpfsHash, fcl.t.String),
         fcl.arg("null", fcl.t.String),
       ],
